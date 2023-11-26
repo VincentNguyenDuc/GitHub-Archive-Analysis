@@ -1,28 +1,23 @@
-# Streamlit Web Application
-A Data Science Web Application using Streamlit
+# GitHub Archive Analysis
 
 ## Table of Contents
-- [Streamlit Web Application](#streamlit-web-application)
+- [GitHub Archive Analysis](#github-archive-analysis)
   - [Table of Contents](#table-of-contents)
   - [General Information](#general-information)
   - [Technologies, Frameworks, and Tools](#technologies-frameworks-and-tools)
-  - [Setup](#setup)
-  - [To-Dos](#to-dos)
   - [Acknowledgements](#acknowledgements)
 
 ## General Information
-...
+An End-to-end Data Engineer and Data Science Project
 
 ## Technologies, Frameworks, and Tools
-...
 
-## Setup
-...
-
-## To-Dos
-- [x] Feature 1
-- [x] Feature 2
-- [x] Feature 3
+- Google Cloud Storage
+- BigQuery
+- Terraform
+- Spark
+- Streamlit
 
 ## Acknowledgements
-...
+- Check out Tutorials and Introductions to these technologies at [DataZoomcamp](https://dezoomcamp.streamlit.app/)
+- The datasource from [GH Archive](https://www.gharchive.org/)
