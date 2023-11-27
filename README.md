@@ -12,12 +12,13 @@ An End-to-end Data Engineer and Data Science Project
 
 ## Technologies, Frameworks, and Tools
 
-- Google Cloud Storage
-- BigQuery
-- Terraform
-- Spark
-- Streamlit
+- [Docker](https://docs.docker.com/)
+- [Cloud Storage](https://cloud.google.com/storage/docs)
+- [BigQuery](https://cloud.google.com/bigquery/docs)
+- [Terraform](https://developer.hashicorp.com/terraform/docs)
+- [Prefect](https://docs.prefect.io/latest/)
+- [Streamlit](https://docs.streamlit.io/)
 
 ## Acknowledgements
-- Check out Tutorials and Introductions to these technologies at [DataZoomcamp](https://dezoomcamp.streamlit.app/)
-- The datasource from [GH Archive](https://www.gharchive.org/)
+- Introductions to technologies and tools: [DataZoomcamp](https://dezoomcamp.streamlit.app/)
+- The data source: [GH Archive](https://www.gharchive.org/)
