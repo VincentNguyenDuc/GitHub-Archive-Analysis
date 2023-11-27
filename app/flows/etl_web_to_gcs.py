@@ -8,7 +8,8 @@ import requests
 @task(retries=3)
 def fetch(url, filename) -> pd.DataFrame:
     """Read data from https://www.gharchive.org/ into pandas DataFrame"""
-    path = f"data/raw/{filename}.json.gzip"
+    path = f"./tmp/{filename}.json.gzip"
+    print("\n" + filename + "\n")
     get_response = requests.get(url, stream=True)
     with open(path, 'wb') as f:
         for chunk in get_response.iter_content(chunk_size=1024):
@@ -38,21 +39,23 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
 @task()
 def write_local(df: pd.DataFrame, filename: str) -> Path:
     """Write DataFrame out locally as parquet file"""
-    path = Path(f"data/clean/{filename}.csv") 
-    df.to_csv(path)
+    path = Path(f"./tmp/{filename}.csv.gz") 
+    df.to_csv(path, compression="gzip")
     return path
 
 @task()
 def write_gcs(path: Path) -> None:
-    """Upload local parquet file to GCS"""
-    gcs_block = GcsBucket.load("zoom-gcs")
-    gcs_block.upload_from_path(from_path=path, to_path=path)
+    """Upload local csv file to GCS"""
+    gcs_block = GcsBucket.load("github-archive-gcs")
+    gcs_block.upload_from_path(
+        from_path=path,
+        to_path=f"2015/{path.name}"
+    )
 
-@flow()
+@flow(log_prints=True)
 def etl_web_to_gcs() -> None:
     """The main ETL function"""
-    Path("./data/raw").mkdir(parents=True, exist_ok=True)
-    Path("./data/clean").mkdir(parents=True, exist_ok=True)
+    Path("./tmp").mkdir(parents=True, exist_ok=True)
     
     year = 2015
     month = 1
@@ -64,8 +67,7 @@ def etl_web_to_gcs() -> None:
     df = fetch(url, filename)
     clean_df = transform_data(df)
     path = write_local(clean_df, filename)
-    print(path)
-
+    write_gcs(path)
 
 if __name__ == "__main__":
     etl_web_to_gcs()
