@@ -6,8 +6,17 @@ from utils import rename_cols
 import requests
 
 @task(retries=3)
-def fetch(url, filename) -> pd.DataFrame:
-    """Read data from https://www.gharchive.org/ into pandas DataFrame"""
+def fetch(url:str, filename:str) -> pd.DataFrame:
+    """
+    Read data from https://www.gharchive.org/ into pandas DataFrame
+
+    Args:
+        url (str): The URL of the data source
+        filename (str): dataset name
+
+    Returns:
+        pd.DataFrame: a pandas dataframe
+    """
     path = f"./tmp/{filename}.json.gzip"
     print("\n" + filename + "\n")
     get_response = requests.get(url, stream=True)
@@ -21,6 +30,15 @@ def fetch(url, filename) -> pd.DataFrame:
 
 @task(retries=3)
 def transform_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Perform a simple data wrangling
+
+    Args:
+        df (pd.DataFrame): a dataframe
+
+    Returns:
+        pd.DataFrame: clean dataframe
+    """
     
     df.drop(["payload", "org"], axis=1, inplace=True)
     
@@ -38,14 +56,26 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     
 @task()
 def write_local(df: pd.DataFrame, filename: str) -> Path:
-    """Write DataFrame out locally as parquet file"""
+    """Write DataFrame out locally as csv gzipped file
+
+    Args:
+        df (pd.DataFrame): a dataframe
+        filename (str): the dataset file name
+
+    Returns:
+        Path: a path object point at the location of the writen file
+    """
     path = Path(f"./tmp/{filename}.csv.gz") 
     df.to_csv(path, compression="gzip")
     return path
 
 @task()
 def write_gcs(path: Path) -> None:
-    """Upload local csv file to GCS"""
+    """Upload local file to GCS
+
+    Args:
+        path (Path): the path of the file
+    """
     gcs_block = GcsBucket.load("github-archive-gcs")
     gcs_block.upload_from_path(
         from_path=path,
