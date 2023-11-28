@@ -85,7 +85,7 @@ def main_bq_flow(
     days: list[int] = list(range(1, 32)),
     hours: list[int] = list(range(24))
 ):
-    """Execute multiples ETL flows
+    """Execute multiples ETL flows from Cloud Storage to BigQuery
 
     Args:
         year (int, optional): A year. Defaults to 2015.
@@ -100,4 +100,4 @@ def main_bq_flow(
 
 
 if __name__ == "__main__":
-    main_bq_flow(2015, 1, [1], [1])
+    main_bq_flow(year=2015, month=1, days=[1], hours=[1])
