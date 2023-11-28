@@ -1,8 +1,8 @@
 import pandas as pd
 
-DATA_SOURCE_FILE_EXTENSION = "json.gz"
-DATA_OUTPUT_FILE_EXTENSION = "csv.gz"
-GCS_BUCKET = "github-archive-gcs"
+SOURCE_FILE_EXTENSION = "json.gz"
+GCS_FILE_EXTENSION = "csv.gz"
+GCS_BUCKET_NAME = "github-archive-gcs"
 DATA_SOURCE_URL = "https://data.gharchive.org"
 
 def rename_cols(df:pd.DataFrame, prefix:str) -> None:

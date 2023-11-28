@@ -3,7 +3,7 @@ import pandas as pd
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect.tasks import task_input_hash
-from utils import rename_cols, DATA_SOURCE_FILE_EXTENSION, DATA_OUTPUT_FILE_EXTENSION, GCS_BUCKET, DATA_SOURCE_URL
+from utils import rename_cols, SOURCE_FILE_EXTENSION, GCS_FILE_EXTENSION, GCS_BUCKET_NAME, DATA_SOURCE_URL
 from datetime import timedelta
 import requests
 import shutil
@@ -21,7 +21,7 @@ def fetch(url: str, filename: str) -> pd.DataFrame:
     Returns:
         pd.DataFrame: a pandas dataframe
     """
-    path = f"./tmp/{filename}.{DATA_SOURCE_FILE_EXTENSION}"
+    path = f"./tmp/{filename}.{SOURCE_FILE_EXTENSION}"
     print("\n" + filename + "\n")
     get_response = requests.get(url, stream=True)
     with open(path, 'wb') as f:
@@ -71,7 +71,7 @@ def write_local(df: pd.DataFrame, filename: str) -> Path:
     Returns:
         Path: a path object point at the location of the writen file
     """
-    path = Path(f"./tmp/{filename}.{DATA_OUTPUT_FILE_EXTENSION}")
+    path = Path(f"./tmp/{filename}.{GCS_FILE_EXTENSION}")
     df.to_csv(path, compression="gzip")
     return path
 
@@ -83,7 +83,7 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
     Args:
         path (Path): the path of the file
     """
-    gcs_block = GcsBucket.load(GCS_BUCKET)
+    gcs_block = GcsBucket.load(GCS_BUCKET_NAME)
     gcs_block.upload_from_path(
         from_path=from_path,
         to_path=to_path
@@ -112,7 +112,7 @@ def etl_web_to_gcs(year, month, date, hour) -> None:
 
     # construct file name and URL
     filename = f"{year}-{month:02}-{date:02}-{hour}"
-    url = f"{DATA_SOURCE_URL}/{filename}.{DATA_SOURCE_FILE_EXTENSION}"
+    url = f"{DATA_SOURCE_URL}/{filename}.{SOURCE_FILE_EXTENSION}"
 
     # fetch data
     df = fetch(url, filename)
@@ -129,7 +129,7 @@ def etl_web_to_gcs(year, month, date, hour) -> None:
 
 
 @flow(log_prints=True)
-def parent_flow(
+def main_gcs_flow(
     year: int = 2015,
     month: int = 1,
     dates: list[int] = list(range(1, 32)),
@@ -149,4 +149,4 @@ def parent_flow(
 
 
 if __name__ == "__main__":
-    parent_flow()
+    main_gcs_flow(2015, 1, [1], [1])
