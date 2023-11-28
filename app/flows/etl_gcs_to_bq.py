@@ -1,4 +1,4 @@
-from utils import GCS_FILE_EXTENSION, GCS_BUCKET_NAME
+from utils import GCS_FILE_EXTENSION, GCS_BUCKET_NAME, TEMP_PATH
 from pathlib import Path
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
@@ -9,12 +9,12 @@ import requests
 
 
 @task
-def extract_from_gcs(dt: datetime, path_to_extract="./data") -> Path:
+def extract_from_gcs(dt: datetime, path_to_extract=TEMP_PATH) -> Path:
     """Download data from GCS
 
     Args:
         dt (datetime): a datetime object with (year, month, day, hour)
-        path_to_extract (str): a location to extract the data. Default to "./data/"
+        path_to_extract (str): a directory to extract the data. Default to "{CURDIR}/tmp"
 
     Returns:
         Path: the location of the data

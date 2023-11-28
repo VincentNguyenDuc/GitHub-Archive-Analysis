@@ -4,6 +4,7 @@ SOURCE_FILE_EXTENSION = "json.gz"
 GCS_FILE_EXTENSION = "csv.gz"
 GCS_BUCKET_NAME = "github-archive-gcs"
 DATA_SOURCE_URL = "https://data.gharchive.org"
+TEMP_PATH = "./tmp"
 
 
 def rename_cols(df: pd.DataFrame, prefix: str) -> None:

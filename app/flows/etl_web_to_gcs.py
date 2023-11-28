@@ -3,7 +3,7 @@ import pandas as pd
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect.tasks import task_input_hash
-from utils import rename_cols, SOURCE_FILE_EXTENSION, GCS_FILE_EXTENSION, GCS_BUCKET_NAME, DATA_SOURCE_URL
+from utils import rename_cols, SOURCE_FILE_EXTENSION, GCS_FILE_EXTENSION, GCS_BUCKET_NAME, DATA_SOURCE_URL, TEMP_PATH
 from datetime import timedelta, datetime
 import requests
 import shutil
@@ -21,7 +21,7 @@ def fetch(url: str, filename: str) -> pd.DataFrame:
     Returns:
         pd.DataFrame: a pandas dataframe
     """
-    path = f"./tmp/{filename}.{SOURCE_FILE_EXTENSION}"
+    path = f"{TEMP_PATH}/{filename}.{SOURCE_FILE_EXTENSION}"
     print("\n" + filename + "\n")
     get_response = requests.get(url, stream=True)
     with open(path, 'wb') as f:
@@ -71,7 +71,7 @@ def write_local(df: pd.DataFrame, filename: str) -> Path:
     Returns:
         Path: a path object point at the location of the writen file
     """
-    path = Path(f"./tmp/{filename}.{GCS_FILE_EXTENSION}")
+    path = Path(f"{TEMP_PATH}/{filename}.{GCS_FILE_EXTENSION}")
     df.to_csv(path, compression="gzip")
     return path
 
@@ -93,14 +93,14 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
 
 @task()
 def set_up() -> None:
-    Path("./tmp").mkdir(parents=True, exist_ok=True)
+    Path(TEMP_PATH).mkdir(parents=True, exist_ok=True)
     return None
 
 
 @task()
 def tear_down() -> None:
     """Tear down temporary folder"""
-    shutil.rmtree("./tmp")
+    shutil.rmtree(TEMP_PATH)
     return None
 
 
