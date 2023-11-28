@@ -1,4 +1,4 @@
-from utils import GcpConstants, LocalConstants, DataConstants
+from utils import tear_down, GcpConstants, LocalConstants, DataConstants
 from pathlib import Path
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
@@ -29,7 +29,17 @@ def fetch_from_gcs(dt: datetime, path_to_extract=LocalConstants.TEMP_PATH) -> Pa
 
 @task(retries=3, name="gcs_to_bq")
 def transform_data(path: Path) -> pd.DataFrame:
+    """Some simple data wrangling
+
+    Args:
+        path (Path): location of the data file
+
+    Returns:
+        pd.DataFrame: a clean dataframe
+    """
     df = pd.read_csv(path, compression=DataConstants.COMPRESSION_TYPE)
+    df.drop_duplicates(inplace=True)
+    df.dropna(inplace=True)
     return df
 
 
@@ -54,15 +64,18 @@ def write_bq(df: pd.DataFrame, gbq_table_name="2015") -> None:
 
 
 @flow()
-def etl_gcs_to_bq(dt: datetime) -> None:
+def etl_gcs_to_bq(dt: datetime, teardown: bool = True) -> None:
     """Load data from Google Cloud Storage to BigQuery
 
     Args:
         dt (datetime): a datetime object with (year, month, day, hour)
+        teardown (bool, optional): delete the temporary folder or not. Defaults to True.
     """
     path = fetch_from_gcs(dt)
     df = transform_data(path)
     write_bq(df, dt.year)
+    if teardown:
+        tear_down()
 
 
 @flow(log_prints=True)

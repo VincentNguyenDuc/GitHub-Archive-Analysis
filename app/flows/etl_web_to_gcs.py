@@ -3,10 +3,9 @@ import pandas as pd
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect.tasks import task_input_hash
-from utils import rename_cols, GcpConstants, LocalConstants, DataConstants
+from utils import rename_cols, set_up, tear_down, GcpConstants, LocalConstants, DataConstants
 from datetime import timedelta, datetime
 import requests
-import shutil
 
 
 @task(retries=3, cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
@@ -55,10 +54,10 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     repo = pd.json_normalize(df["repo"])
     rename_cols(repo, "repo")
 
-    clean_data = df.join([actor, repo])
-    clean_data.drop(["actor", "repo"], axis=1, inplace=True)
+    clean_df = df.join([actor, repo])
+    clean_df.drop(["actor", "repo"], axis=1, inplace=True)
 
-    return clean_data
+    return clean_df
 
 
 @task()
@@ -93,22 +92,14 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
     return None
 
 
-@task()
-def set_up() -> None:
-    Path(LocalConstants.TEMP_PATH).mkdir(parents=True, exist_ok=True)
-    return None
-
-
-@task()
-def tear_down() -> None:
-    """Tear down temporary folder"""
-    shutil.rmtree(LocalConstants.TEMP_PATH)
-    return None
-
-
 @flow(log_prints=True)
-def etl_web_to_gcs(dt: datetime) -> None:
-    """The main ETL function"""
+def etl_web_to_gcs(dt: datetime, teardown: bool = True) -> None:
+    """The main ETL function
+
+    Args:
+        dt (datetime): a datetime object with year, month, day, hour
+        teardown (bool, optional): delete the temporary folder or not. Defaults to True.
+    """
 
     set_up()
 
@@ -128,7 +119,8 @@ def etl_web_to_gcs(dt: datetime) -> None:
     to_path = f"{year}/{from_path.name}"
     write_gcs(from_path, to_path)
 
-    tear_down()
+    if teardown:
+        tear_down()
 
 
 @flow(log_prints=True)
