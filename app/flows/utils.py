@@ -1,10 +1,22 @@
 import pandas as pd
 
-SOURCE_FILE_EXTENSION = "json.gz"
-GCS_FILE_EXTENSION = "csv.gz"
-GCS_BUCKET_NAME = "github-archive-gcs"
-DATA_SOURCE_URL = "https://data.gharchive.org"
-TEMP_PATH = "./tmp"
+
+class GcpConstants:
+    FILE_EXTENSION = "csv.gz"
+    BUCKET_NAME = "github-archive-gcs"
+    CREDS_NAME = "github-archive-gcp-creds"
+    BQ_DATASET = "github_archive_data_all"
+    PROJECT_ID = "friendly-basis-406112"
+
+
+class LocalConstants:
+    TEMP_PATH = "./tmp"
+
+
+class DataConstants:
+    FILE_EXTENSION = "json.gz"
+    COMPRESSION_TYPE = "gzip"
+    SOURCE_URL = "https://data.gharchive.org"
 
 
 def rename_cols(df: pd.DataFrame, prefix: str) -> None:
@@ -15,5 +27,5 @@ def rename_cols(df: pd.DataFrame, prefix: str) -> None:
         prefix (str): a string
     """
     col_names = df.columns.to_list()
-    new_col_names = list(map(lambda name: f"{prefix}.{name}", col_names))
+    new_col_names = list(map(lambda name: f"{prefix}_{name}", col_names))
     df.columns = new_col_names

@@ -1,15 +1,15 @@
-from utils import GCS_FILE_EXTENSION, GCS_BUCKET_NAME, TEMP_PATH
+from utils import GcpConstants, LocalConstants, DataConstants
 from pathlib import Path
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect_gcp import GcpCredentials
-from datetime import datetime
+from prefect.tasks import task_input_hash
+from datetime import datetime, timedelta
 import pandas as pd
-import requests
 
 
-@task
-def extract_from_gcs(dt: datetime, path_to_extract=TEMP_PATH) -> Path:
+@task(retries=3, cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
+def fetch_from_gcs(dt: datetime, path_to_extract=LocalConstants.TEMP_PATH) -> Path:
     """Download data from GCS
 
     Args:
@@ -20,11 +20,37 @@ def extract_from_gcs(dt: datetime, path_to_extract=TEMP_PATH) -> Path:
         Path: the location of the data
     """
     year, month, day, hour = dt.year, dt.month, dt.day, dt.hour
-    gcs_path = f"{year}/{year}-{month:02}-{day:02}-{hour}.{GCS_FILE_EXTENSION}"
-    gcs_block = GcsBucket.load(GCS_BUCKET_NAME)
+    gcs_path = f"{year}/{year}-{month:02}-{day:02}-{hour}.{GcpConstants.FILE_EXTENSION}"
+    gcs_block = GcsBucket.load(GcpConstants.BUCKET_NAME)
 
     gcs_block.get_directory(from_path=gcs_path, local_path=path_to_extract)
     return Path(f"{path_to_extract}/{gcs_path}")
+
+
+@task(retries=3, name="gcs_to_bq")
+def transform_data(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path, compression=DataConstants.COMPRESSION_TYPE)
+    return df
+
+
+@task(retries=3)
+def write_bq(df: pd.DataFrame, gbq_table_name="2015") -> None:
+    """Write data to BigQuery
+
+    Args:
+        df (pd.DataFrame): a dataframe
+        gbq_table_name(str): BigQuery table name to write to
+    """
+
+    gcp_credentials_block = GcpCredentials.load(GcpConstants.CREDS_NAME)
+
+    df.to_gbq(
+        destination_table=f"{GcpConstants.BQ_DATASET}.{gbq_table_name}",
+        project_id=GcpConstants.PROJECT_ID,
+        credentials=gcp_credentials_block.get_credentials_from_service_account(),
+        chunksize=500_000,
+        if_exists="append"
+    )
 
 
 @flow()
@@ -34,8 +60,9 @@ def etl_gcs_to_bq(dt: datetime) -> None:
     Args:
         dt (datetime): a datetime object with (year, month, day, hour)
     """
-    path = extract_from_gcs(dt)
-    print(path)
+    path = fetch_from_gcs(dt)
+    df = transform_data(path)
+    write_bq(df, dt.year)
 
 
 @flow(log_prints=True)
@@ -60,6 +87,4 @@ def main_bq_flow(
 
 
 if __name__ == "__main__":
-    from etl_web_to_gcs import main_gcs_flow
-    main_gcs_flow(2015, 1, [1], [1])
     main_bq_flow(2015, 1, [1], [1])

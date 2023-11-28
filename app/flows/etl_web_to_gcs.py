@@ -3,14 +3,14 @@ import pandas as pd
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect.tasks import task_input_hash
-from utils import rename_cols, SOURCE_FILE_EXTENSION, GCS_FILE_EXTENSION, GCS_BUCKET_NAME, DATA_SOURCE_URL, TEMP_PATH
+from utils import rename_cols, GcpConstants, LocalConstants, DataConstants
 from datetime import timedelta, datetime
 import requests
 import shutil
 
 
 @task(retries=3, cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
-def fetch(url: str, filename: str) -> pd.DataFrame:
+def fetch_from_source(url: str, filename: str) -> pd.DataFrame:
     """
     Read data from https://www.gharchive.org/ into pandas DataFrame
 
@@ -21,7 +21,7 @@ def fetch(url: str, filename: str) -> pd.DataFrame:
     Returns:
         pd.DataFrame: a pandas dataframe
     """
-    path = f"{TEMP_PATH}/{filename}.{SOURCE_FILE_EXTENSION}"
+    path = f"{LocalConstants.TEMP_PATH}/{filename}.{DataConstants.FILE_EXTENSION}"
     print("\n" + filename + "\n")
     get_response = requests.get(url, stream=True)
     with open(path, 'wb') as f:
@@ -29,11 +29,12 @@ def fetch(url: str, filename: str) -> pd.DataFrame:
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
 
-    df = pd.read_json(path, compression='gzip', lines=True)
+    df = pd.read_json(
+        path, compression=DataConstants.COMPRESSION_TYPE, lines=True)
     return df
 
 
-@task(retries=3)
+@task(retries=3, name="web_to_gcs")
 def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform a simple data wrangling
@@ -71,8 +72,9 @@ def write_local(df: pd.DataFrame, filename: str) -> Path:
     Returns:
         Path: a path object point at the location of the writen file
     """
-    path = Path(f"{TEMP_PATH}/{filename}.{GCS_FILE_EXTENSION}")
-    df.to_csv(path, compression="gzip")
+    path = Path(
+        f"{LocalConstants.TEMP_PATH}/{filename}.{GcpConstants.FILE_EXTENSION}")
+    df.to_csv(path, compression=DataConstants.COMPRESSION_TYPE, index=False)
     return path
 
 
@@ -83,7 +85,7 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
     Args:
         path (Path): the path of the file
     """
-    gcs_block = GcsBucket.load(GCS_BUCKET_NAME)
+    gcs_block = GcsBucket.load(GcpConstants.BUCKET_NAME)
     gcs_block.upload_from_path(
         from_path=from_path,
         to_path=to_path
@@ -93,14 +95,14 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
 
 @task()
 def set_up() -> None:
-    Path(TEMP_PATH).mkdir(parents=True, exist_ok=True)
+    Path(LocalConstants.TEMP_PATH).mkdir(parents=True, exist_ok=True)
     return None
 
 
 @task()
 def tear_down() -> None:
     """Tear down temporary folder"""
-    shutil.rmtree(TEMP_PATH)
+    shutil.rmtree(LocalConstants.TEMP_PATH)
     return None
 
 
@@ -113,10 +115,10 @@ def etl_web_to_gcs(dt: datetime) -> None:
     # construct file name and URL
     year, month, day, hour = dt.year, dt.month, dt.day, dt.hour
     filename = f"{year}-{month:02}-{day:02}-{hour}"
-    url = f"{DATA_SOURCE_URL}/{filename}.{SOURCE_FILE_EXTENSION}"
+    url = f"{DataConstants.SOURCE_URL}/{filename}.{DataConstants.FILE_EXTENSION}"
 
     # fetch data
-    df = fetch(url, filename)
+    df = fetch_from_source(url, filename)
 
     # transform
     clean_df = transform_data(df)
