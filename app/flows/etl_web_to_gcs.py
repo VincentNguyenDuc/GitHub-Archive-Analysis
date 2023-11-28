@@ -4,7 +4,7 @@ from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect.tasks import task_input_hash
 from utils import rename_cols, SOURCE_FILE_EXTENSION, GCS_FILE_EXTENSION, GCS_BUCKET_NAME, DATA_SOURCE_URL
-from datetime import timedelta
+from datetime import timedelta, datetime
 import requests
 import shutil
 
@@ -105,13 +105,14 @@ def tear_down() -> None:
 
 
 @flow(log_prints=True)
-def etl_web_to_gcs(year, month, date, hour) -> None:
+def etl_web_to_gcs(dt: datetime) -> None:
     """The main ETL function"""
 
     set_up()
 
     # construct file name and URL
-    filename = f"{year}-{month:02}-{date:02}-{hour}"
+    year, month, day, hour = dt.year, dt.month, dt.day, dt.hour
+    filename = f"{year}-{month:02}-{day:02}-{hour}"
     url = f"{DATA_SOURCE_URL}/{filename}.{SOURCE_FILE_EXTENSION}"
 
     # fetch data
@@ -132,7 +133,7 @@ def etl_web_to_gcs(year, month, date, hour) -> None:
 def main_gcs_flow(
     year: int = 2015,
     month: int = 1,
-    dates: list[int] = list(range(1, 32)),
+    days: list[int] = list(range(1, 32)),
     hours: list[int] = list(range(24))
 ):
     """Execute multiples ETL flows
@@ -140,12 +141,13 @@ def main_gcs_flow(
     Args:
         year (int, optional): A year. Defaults to 2015.
         month (int, optional): a month. Defaults to 1.
-        dates (list[int], optional): dates of a month. Defaults to list(range(1, 32)).
+        days (list[int], optional): days of a month. Defaults to list(range(1, 32)).
         hours (list[int], optional): hours of a day. Defaults to list(range(24)).
     """
-    for d in dates:
+    for d in days:
         for h in hours:
-            etl_web_to_gcs(year, month, d, h)
+            dt = datetime(year=year, month=month, day=d, hour=h)
+            etl_web_to_gcs(dt)
 
 
 if __name__ == "__main__":

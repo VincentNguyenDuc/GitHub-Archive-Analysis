@@ -3,35 +3,38 @@ from pathlib import Path
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect_gcp import GcpCredentials
+from datetime import datetime
 import pandas as pd
 import requests
 
+
 @task
-def extract_from_gcs(year:int, month:int, date:int, hour:int) -> Path:
+def extract_from_gcs(dt: datetime, path_to_extract="./data") -> Path:
     """Download data from GCS
 
     Args:
-        year (int): a year
-        month (int): a month
-        date (int): a date
-        hour (int): a hour
+        dt (datetime): a datetime object with (year, month, day, hour)
+        path_to_extract (str): a location to extract the data. Default to "./data/"
 
     Returns:
-        Path: a path
+        Path: the location of the data
     """
-    gcs_path = f"{year}/{year}-{month:02}-{date:02}-{hour}.{GCS_FILE_EXTENSION}"
+    year, month, day, hour = dt.year, dt.month, dt.day, dt.hour
+    gcs_path = f"{year}/{year}-{month:02}-{day:02}-{hour}.{GCS_FILE_EXTENSION}"
     gcs_block = GcsBucket.load(GCS_BUCKET_NAME)
-    
-    local_data_path = "./data"
-    gcs_block.get_directory(from_path=gcs_path, local_path=local_data_path)
-    return Path(f"{local_data_path}/{gcs_path}")
-    
-    
+
+    gcs_block.get_directory(from_path=gcs_path, local_path=path_to_extract)
+    return Path(f"{path_to_extract}/{gcs_path}")
+
 
 @flow()
-def etl_gcs_to_bq(year, month, date, hour) -> None:
-    """Load data from Google Cloud Storage to BigQuery"""
-    path = extract_from_gcs(year, month, date, hour)
+def etl_gcs_to_bq(dt: datetime) -> None:
+    """Load data from Google Cloud Storage to BigQuery
+
+    Args:
+        dt (datetime): a datetime object with (year, month, day, hour)
+    """
+    path = extract_from_gcs(dt)
     print(path)
 
 
@@ -39,7 +42,7 @@ def etl_gcs_to_bq(year, month, date, hour) -> None:
 def main_bq_flow(
     year: int = 2015,
     month: int = 1,
-    dates: list[int] = list(range(1, 32)),
+    days: list[int] = list(range(1, 32)),
     hours: list[int] = list(range(24))
 ):
     """Execute multiples ETL flows
@@ -47,12 +50,16 @@ def main_bq_flow(
     Args:
         year (int, optional): A year. Defaults to 2015.
         month (int, optional): a month. Defaults to 1.
-        dates (list[int], optional): dates of a month. Defaults to list(range(1, 32)).
+        days (list[int], optional): days of a month. Defaults to list(range(1, 32)).
         hours (list[int], optional): hours of a day. Defaults to list(range(24)).
     """
-    for d in dates:
+    for d in days:
         for h in hours:
-            etl_gcs_to_bq(year, month, d, h)
+            dt = datetime(year=year, month=month, day=d, hour=h)
+            etl_gcs_to_bq(dt)
+
 
 if __name__ == "__main__":
+    from etl_web_to_gcs import main_gcs_flow
+    main_gcs_flow(2015, 1, [1], [1])
     main_bq_flow(2015, 1, [1], [1])
