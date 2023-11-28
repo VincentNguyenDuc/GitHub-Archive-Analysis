@@ -3,14 +3,13 @@ import pandas as pd
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect.tasks import task_input_hash
-from utils import rename_cols, SOURCE_FILE_EXTENSION, GCS_FILE_EXTENSION, GCS_BUCKET_NAME, DATA_SOURCE_URL
-from datetime import timedelta
+from utils import rename_cols, set_up, tear_down, GcpConstants, LocalConstants, DataConstants
+from datetime import timedelta, datetime
 import requests
-import shutil
 
 
 @task(retries=3, cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
-def fetch(url: str, filename: str) -> pd.DataFrame:
+def fetch_from_source(url: str, filename: str) -> pd.DataFrame:
     """
     Read data from https://www.gharchive.org/ into pandas DataFrame
 
@@ -21,7 +20,7 @@ def fetch(url: str, filename: str) -> pd.DataFrame:
     Returns:
         pd.DataFrame: a pandas dataframe
     """
-    path = f"./tmp/{filename}.{SOURCE_FILE_EXTENSION}"
+    path = f"{LocalConstants.TEMP_PATH}/{filename}.{DataConstants.FILE_EXTENSION}"
     print("\n" + filename + "\n")
     get_response = requests.get(url, stream=True)
     with open(path, 'wb') as f:
@@ -29,11 +28,12 @@ def fetch(url: str, filename: str) -> pd.DataFrame:
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
 
-    df = pd.read_json(path, compression='gzip', lines=True)
+    df = pd.read_json(
+        path, compression=DataConstants.COMPRESSION_TYPE, lines=True)
     return df
 
 
-@task(retries=3)
+@task(retries=3, name="web_to_gcs")
 def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform a simple data wrangling
@@ -54,10 +54,10 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     repo = pd.json_normalize(df["repo"])
     rename_cols(repo, "repo")
 
-    clean_data = df.join([actor, repo])
-    clean_data.drop(["actor", "repo"], axis=1, inplace=True)
+    clean_df = df.join([actor, repo])
+    clean_df.drop(["actor", "repo"], axis=1, inplace=True)
 
-    return clean_data
+    return clean_df
 
 
 @task()
@@ -71,8 +71,9 @@ def write_local(df: pd.DataFrame, filename: str) -> Path:
     Returns:
         Path: a path object point at the location of the writen file
     """
-    path = Path(f"./tmp/{filename}.{GCS_FILE_EXTENSION}")
-    df.to_csv(path, compression="gzip")
+    path = Path(
+        f"{LocalConstants.TEMP_PATH}/{filename}.{GcpConstants.FILE_EXTENSION}")
+    df.to_csv(path, compression=DataConstants.COMPRESSION_TYPE, index=False)
     return path
 
 
@@ -83,7 +84,7 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
     Args:
         path (Path): the path of the file
     """
-    gcs_block = GcsBucket.load(GCS_BUCKET_NAME)
+    gcs_block = GcsBucket.load(GcpConstants.BUCKET_NAME)
     gcs_block.upload_from_path(
         from_path=from_path,
         to_path=to_path
@@ -91,31 +92,24 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
     return None
 
 
-@task()
-def set_up() -> None:
-    Path("./tmp").mkdir(parents=True, exist_ok=True)
-    return None
-
-
-@task()
-def tear_down() -> None:
-    """Tear down temporary folder"""
-    shutil.rmtree("./tmp")
-    return None
-
-
 @flow(log_prints=True)
-def etl_web_to_gcs(year, month, date, hour) -> None:
-    """The main ETL function"""
+def etl_web_to_gcs(dt: datetime, teardown: bool = True) -> None:
+    """The main ETL function
+
+    Args:
+        dt (datetime): a datetime object with year, month, day, hour
+        teardown (bool, optional): delete the temporary folder or not. Defaults to True.
+    """
 
     set_up()
 
     # construct file name and URL
-    filename = f"{year}-{month:02}-{date:02}-{hour}"
-    url = f"{DATA_SOURCE_URL}/{filename}.{SOURCE_FILE_EXTENSION}"
+    year, month, day, hour = dt.year, dt.month, dt.day, dt.hour
+    filename = f"{year}-{month:02}-{day:02}-{hour}"
+    url = f"{DataConstants.SOURCE_URL}/{filename}.{DataConstants.FILE_EXTENSION}"
 
     # fetch data
-    df = fetch(url, filename)
+    df = fetch_from_source(url, filename)
 
     # transform
     clean_df = transform_data(df)
@@ -125,14 +119,15 @@ def etl_web_to_gcs(year, month, date, hour) -> None:
     to_path = f"{year}/{from_path.name}"
     write_gcs(from_path, to_path)
 
-    tear_down()
+    if teardown:
+        tear_down()
 
 
 @flow(log_prints=True)
 def main_gcs_flow(
     year: int = 2015,
     month: int = 1,
-    dates: list[int] = list(range(1, 32)),
+    days: list[int] = list(range(1, 32)),
     hours: list[int] = list(range(24))
 ):
     """Execute multiples ETL flows
@@ -140,12 +135,13 @@ def main_gcs_flow(
     Args:
         year (int, optional): A year. Defaults to 2015.
         month (int, optional): a month. Defaults to 1.
-        dates (list[int], optional): dates of a month. Defaults to list(range(1, 32)).
+        days (list[int], optional): days of a month. Defaults to list(range(1, 32)).
         hours (list[int], optional): hours of a day. Defaults to list(range(24)).
     """
-    for d in dates:
+    for d in days:
         for h in hours:
-            etl_web_to_gcs(year, month, d, h)
+            dt = datetime(year=year, month=month, day=d, hour=h)
+            etl_web_to_gcs(dt)
 
 
 if __name__ == "__main__":
