@@ -5,6 +5,9 @@ class GcpConstants:
     BQ_DATASET = "github_archive_data_all"
     PROJECT_ID = "friendly-basis-406112"
 
+class PrefectConstants:
+    DOCKER_BLOCK = "github-archive-docker"
+
 
 class LocalConstants:
     TEMP_PATH = "./tmp"
