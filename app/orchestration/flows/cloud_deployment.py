@@ -1,9 +1,14 @@
 from prefect import flow
 from etl_gcs_to_bq import main_bq_flow
 from etl_web_to_gcs import main_gcs_flow
+from datetime import datetime
 
 
-@flow(log_prints=True, retries=3)
+@flow(
+    name="GCP-Flow",
+    log_prints=True,
+    retries=3
+)
 def gcp_flow(
     year: int = 2015,
     month: int = 1,
@@ -19,13 +24,14 @@ def gcp_flow(
 
 
 if __name__ == "__main__":
+    dt = datetime(2020, 1, 1)
     gcp_flow.serve(
-        name="GCP-Flow-Deployment-2015",
+        name=f"GCP-Flow-Deployment-{dt}",
         parameters={
-            "year": 2016,
-            "month": 1,
+            "year": dt.year,
+            "month": dt.month,
             "days": [
-                1
+                dt.day
             ],
         }
     )

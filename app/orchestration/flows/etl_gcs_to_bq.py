@@ -1,3 +1,7 @@
+"""
+Orchestrated the data from Google Cloud Storage to Google BigQuery
+"""
+
 from constants import GcpConstants, LocalConstants, DataConstants
 from utils import tear_down
 from pathlib import Path
@@ -9,7 +13,13 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 
-@task(retries=3, cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
+@task(
+    name="Fetch-From-GCS",
+    retries=3,
+    cache_key_fn=task_input_hash,
+    cache_expiration=timedelta(days=1),
+    log_prints=True
+)
 def fetch_from_gcs(dt: datetime, path_to_extract=LocalConstants.TEMP_PATH) -> Path:
     """Download data from GCS
 
@@ -21,14 +31,18 @@ def fetch_from_gcs(dt: datetime, path_to_extract=LocalConstants.TEMP_PATH) -> Pa
         Path: the location of the data
     """
     year, month, day, hour = dt.year, dt.month, dt.day, dt.hour
-    gcs_path = f"{year}/{year}-{month:02}-{day:02}-{hour}.{GcpConstants.FILE_EXTENSION}"
+    gcs_path = f"{year}/{month}/{year}-{month:02}-{day:02}-{hour}.{GcpConstants.FILE_EXTENSION}"
     gcs_block = GcsBucket.load(GcpConstants.BUCKET_NAME)
 
     gcs_block.get_directory(from_path=gcs_path, local_path=path_to_extract)
     return Path(f"{path_to_extract}/{gcs_path}")
 
 
-@task(retries=3, name="gcs_to_bq")
+@task(
+    name="Transform-Data-From-GCS",
+    retries=3,
+    log_prints=True
+)
 def transform_data(path: Path) -> pd.DataFrame:
     """Some simple data wrangling
 
@@ -44,7 +58,7 @@ def transform_data(path: Path) -> pd.DataFrame:
     return df
 
 
-@task(retries=3)
+@task(name="Write-BQ", retries=3)
 def write_bq(df: pd.DataFrame, gbq_table_name="2015") -> None:
     """Write data to BigQuery
 
@@ -64,7 +78,11 @@ def write_bq(df: pd.DataFrame, gbq_table_name="2015") -> None:
     )
 
 
-@flow()
+@flow(
+    name="GCS-To-BQ",
+    retries=3,
+    log_prints=True
+)
 def etl_gcs_to_bq(dt: datetime, teardown: bool = True) -> None:
     """Load data from Google Cloud Storage to BigQuery
 
@@ -74,12 +92,15 @@ def etl_gcs_to_bq(dt: datetime, teardown: bool = True) -> None:
     """
     path = fetch_from_gcs(dt)
     df = transform_data(path)
-    write_bq(df, dt.year)
+    write_bq(df, f"{dt.year}")
     if teardown:
         tear_down()
 
 
-@flow(log_prints=True)
+@flow(
+    name="Main-BQ-Flow",
+    log_prints=True
+)
 def main_bq_flow(
     year: int = 2015,
     month: int = 1,

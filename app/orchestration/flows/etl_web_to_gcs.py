@@ -1,3 +1,7 @@
+"""
+Orchestrated the data from source to Google Cloud Storage
+"""
+
 from pathlib import Path
 import pandas as pd
 from prefect import flow, task
@@ -9,7 +13,13 @@ from datetime import timedelta, datetime
 import requests
 
 
-@task(retries=3, cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
+@task(
+    name="Fetch-Data-Source",
+    retries=3,
+    cache_key_fn=task_input_hash,
+    cache_expiration=timedelta(days=1),
+    log_prints=True
+)
 def fetch_from_source(url: str, filename: str) -> pd.DataFrame:
     """
     Read data from https://www.gharchive.org/ into pandas DataFrame
@@ -34,7 +44,11 @@ def fetch_from_source(url: str, filename: str) -> pd.DataFrame:
     return df
 
 
-@task(retries=3, name="web_to_gcs")
+@task(
+    name="Transform-Data-From-Source",
+    retries=3,
+    log_prints=True
+)
 def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform a simple data wrangling
@@ -61,7 +75,7 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     return clean_df
 
 
-@task()
+@task(name="Write-Local", log_prints=True)
 def write_local(df: pd.DataFrame, filename: str) -> Path:
     """Write DataFrame out locally as csv gzipped file
 
@@ -78,7 +92,7 @@ def write_local(df: pd.DataFrame, filename: str) -> Path:
     return path
 
 
-@task()
+@task(name="Write-GCS", log_prints=True)
 def write_gcs(from_path: Path, to_path: Path) -> None:
     """Upload local file to GCS
 
@@ -93,7 +107,7 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
     return None
 
 
-@flow(log_prints=True)
+@flow(name="Data-Source-To-GCS", retries=3, log_prints=True)
 def etl_web_to_gcs(dt: datetime, teardown: bool = True) -> None:
     """The main ETL function
 
@@ -117,14 +131,14 @@ def etl_web_to_gcs(dt: datetime, teardown: bool = True) -> None:
 
     # write to GCS
     from_path = write_local(clean_df, filename)
-    to_path = f"{year}/{from_path.name}"
+    to_path = f"{year}/{month}/{from_path.name}"
     write_gcs(from_path, to_path)
 
     if teardown:
         tear_down()
 
 
-@flow(log_prints=True)
+@flow(name="Main-GCS-Flow", log_prints=True)
 def main_gcs_flow(
     year: int = 2015,
     month: int = 1,

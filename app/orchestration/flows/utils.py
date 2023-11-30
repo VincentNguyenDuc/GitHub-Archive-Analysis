@@ -17,14 +17,14 @@ def rename_cols(df: pd.DataFrame, prefix: str) -> None:
     df.columns = new_col_names
 
 
-@task()
+@task(name="folder-set-up")
 def set_up() -> None:
     """Set up temporary folder"""
     Path(LocalConstants.TEMP_PATH).mkdir(parents=True, exist_ok=True)
     return None
 
 
-@task()
+@task(name="folder-tear-down")
 def tear_down() -> None:
     """Tear down temporary folder"""
     shutil.rmtree(LocalConstants.TEMP_PATH)
