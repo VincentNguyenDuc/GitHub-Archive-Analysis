@@ -131,7 +131,7 @@ def etl_web_to_gcs(dt: datetime, teardown: bool = True) -> None:
 
     # write to GCS
     from_path = write_local(clean_df, filename)
-    to_path = f"{year}/{month}/{from_path.name}"
+    to_path = f"{year}/{month}/{day}/{from_path.name}"
     write_gcs(from_path, to_path)
 
     if teardown:

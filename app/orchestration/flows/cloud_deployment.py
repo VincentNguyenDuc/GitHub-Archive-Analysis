@@ -6,8 +6,8 @@ from datetime import datetime
 
 @flow(
     name="GCP-Flow",
-    log_prints=True,
-    retries=3
+    retries=3,
+    log_prints=True
 )
 def gcp_flow(
     year: int = 2015,
@@ -26,12 +26,10 @@ def gcp_flow(
 if __name__ == "__main__":
     dt = datetime(2020, 1, 1)
     gcp_flow.serve(
-        name=f"GCP-Flow-Deployment-{dt}",
+        name=f"GCP-Flow-Deployment-({dt.strftime('%b-%Y')})",
         parameters={
             "year": dt.year,
             "month": dt.month,
-            "days": [
-                dt.day
-            ],
+            "days": list(range(2, 32))
         }
     )
