@@ -4,6 +4,7 @@ class GcpConstants:
     CREDS_NAME = "github-archive-gcp-creds"
     BQ_DATASET = "github_archive_data_all"
     PROJECT_ID = "friendly-basis-406112"
+    LOCATION = "asia-east2"
 
 class PrefectConstants:
     DOCKER_BLOCK = "github-archive-docker"
