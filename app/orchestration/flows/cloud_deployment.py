@@ -1,3 +1,7 @@
+"""
+Serve a deployment to Prefect Cloud
+"""
+
 from prefect import flow
 from etl_gcs_to_bq import main_bq_flow
 from etl_web_to_gcs import main_gcs_flow
@@ -10,11 +14,21 @@ from datetime import datetime
     log_prints=True
 )
 def gcp_flow(
-    year: int = 2015,
+    year: int,
     month: int = 1,
     days: list[int] = None,
     hours: list[int] = None
 ):
+    """The Main Flow for Deployment:
+    - Data Source to GCS
+    - GCS to BQ
+
+    Args:
+        year (int, optional): a year.
+        month (int, optional): a month. Defaults to 1.
+        days (list[int], optional): a list of days. Defaults to (1 - 31)
+        hours (list[int], optional): a list of hours. Defaults to (0 - 23)
+    """
     if days is None:
         days = list(range(1, 32))
     if hours is None:
