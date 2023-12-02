@@ -21,4 +21,4 @@ An End-to-end Data Engineer and Data Science Project
 
 ## Acknowledgements
 - Introductions to technologies and tools: [DataZoomcamp](https://dezoomcamp.streamlit.app/)
-- The data source: [GH Archive](https://www.gharchive.org/)
+- Data source: [GH Archive](https://www.gharchive.org/)

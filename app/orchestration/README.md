@@ -12,7 +12,15 @@ python3 ${FLOWS_DIR}/etl_web_to_gcs.py
 python3 ${FLOWS_DIR}/etl_gcs_to_bq.py
 
 # Deployment
-python3 ${FLOWS_DIR}/cloud_deployment.py
+python3 cloud_deployment.py
+usage: cloud_deployment.py [-h] -f {GCS,BQ,ALL} [-y {2015,2016,2017,2018,2019,2020,2021,2022}]
+                           [-m {1,2,3,4,5,6,7,8,9,10,11,12}]
+
+options:
+  -h, --help            show this help message and exit
+  -f {GCS,BQ,ALL}, --flowname {GCS,BQ,ALL}
+  -y {2015,2016,2017,2018,2019,2020,2021,2022}, --year {2015,2016,2017,2018,2019,2020,2021,2022}
+  -m {1,2,3,4,5,6,7,8,9,10,11,12}, --month {1,2,3,4,5,6,7,8,9,10,11,12}
 ```
 
 ## Docker

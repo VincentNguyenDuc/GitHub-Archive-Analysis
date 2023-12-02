@@ -7,9 +7,8 @@ from utils import tear_down, set_up
 from pathlib import Path
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
+from prefect_gcp.bigquery import bigquery_create_table, TimePartitioning, SchemaField, BigQueryWarehouse
 from prefect_gcp import GcpCredentials
-from google.cloud import bigquery
-from google.cloud.exceptions import NotFound
 from datetime import datetime
 import pandas as pd
 
@@ -55,68 +54,12 @@ def transform_data(path: Path) -> pd.DataFrame:
     except KeyError:
         pass
 
-    df["created_at"] = pd.to_datetime(df["created_at"]).dt.tz_localize(None)
+    df["created_at"] = pd \
+        .to_datetime(df["created_at"]) \
+        .dt \
+        .tz_localize(None)
 
     return df
-
-
-@task(name="Create-BQ-Table", retries=3)
-def create_table(
-    gbq_table_name: str,
-    schema: list[dict[str, str]],
-    clustering_fields: list[str] = None,
-    time_partitioning: bigquery.TimePartitioning = None
-):
-    """Create a table in Google Big Query Dataset.
-    If the table is already exist, then do nothing
-
-    Args:
-        gbq_table_name (str, optional): table name.
-        schema (list[bigquery.SchemaField], optional): schema of the table.
-        clustering_fields (list[str], optional): clustering. Defaults to None.
-        time_partitioning (bigquery.TimePartitioning, optional): partition. Defaults to None.
-    """
-    client = bigquery.Client(
-        project=GcpConstants.PROJECT_ID,
-        location=GcpConstants.LOCATION
-    )
-    table_id = f"{GcpConstants.PROJECT_ID}.{GcpConstants.BQ_DATASET}.{gbq_table_name}"
-
-    try:
-        client.get_table(table_id)
-        print("Table {} already exists. Do nothing".format(table_id))
-    except NotFound:
-        schema_fields = list(map(bigquery.SchemaField.from_api_repr, schema))
-        table = bigquery.Table(table_id, schema_fields)
-        table.clustering_fields = clustering_fields
-        table.time_partitioning = time_partitioning
-        client.create_table(table)
-
-
-@task(name="Write-BQ", retries=3)
-def write_bq(
-    df: pd.DataFrame,
-    gbq_table_name: str,
-    schema: list[dict[str, str]] = None
-) -> None:
-    """Write data to BigQuery
-
-    Args:
-        df (pd.DataFrame): a dataframe
-        gbq_table_name(str): BigQuery table name to write to
-    """
-
-    gcp_credentials_block = GcpCredentials.load(GcpConstants.CREDS_NAME)
-
-    df.to_gbq(
-        destination_table=f"{GcpConstants.BQ_DATASET}.{gbq_table_name}",
-        project_id=GcpConstants.PROJECT_ID,
-        credentials=gcp_credentials_block.get_credentials_from_service_account(),
-        chunksize=500_000,
-        if_exists="append",
-        table_schema=schema,
-        location=GcpConstants.LOCATION
-    )
 
 
 @flow(name="GCS-To-BQ")
@@ -152,22 +95,35 @@ def etl_gcs_to_bq(dt: datetime, teardown: bool = True) -> None:
         {"name": "repo_name", "type": "STRING"},
         {"name": "repo_url", "type": "STRING"}
     ]
-    clustering_fields = ["id", "type", "public", "repo_name"]
-    time_partitoning = bigquery.TimePartitioning(
-        type_=bigquery.TimePartitioningType.DAY,
-        field="created_at",
-    )
+    clustering_fields = ["repo_name", "type", "id"]
+    time_partitoning = TimePartitioning(field="created_at")  # default by DAY
+    gcp_creds:GcpCredentials = GcpCredentials.load(GcpConstants.CREDS_NAME)
 
-    # create table if not exists
-    create_table(
-        gbq_table_name=table_name,
-        schema=schema,
+    # Create table if not exists
+    bigquery_create_table(
+        dataset=GcpConstants.BQ_DATASET,
+        table=table_name,
+        gcp_credentials=gcp_creds,
+        schema=list(map(SchemaField.from_api_repr, schema)),
         time_partitioning=time_partitoning,
-        clustering_fields=clustering_fields
+        clustering_fields=clustering_fields,
+        location=GcpConstants.LOCATION
     )
 
-    # write data to table
-    write_bq(df, table_name, schema)
+    # write data to table, wrap it around a task decorator
+    @task(name="Upload-Data", retries=3)
+    def to_gbq_wrapper():
+        df.to_gbq(
+            destination_table=f"{GcpConstants.BQ_DATASET}.{table_name}",
+            project_id=GcpConstants.PROJECT_ID,
+            credentials=gcp_creds.get_credentials_from_service_account(),
+            chunksize=500_000,
+            if_exists="append",
+            table_schema=schema,
+            location=GcpConstants.LOCATION
+        )
+    
+    to_gbq_wrapper()
 
     if teardown:
         tear_down()
@@ -195,4 +151,4 @@ def main_bq_flow(
 
 
 if __name__ == "__main__":
-    main_bq_flow(year=2020, month=1, days=[1])
+    main_bq_flow(year=2015, month=1, days=[1, 2, 3], hours=[1])

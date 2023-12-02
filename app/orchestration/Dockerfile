@@ -10,3 +10,5 @@ COPY flows /opt/prefect/flows
 
 # Run our flow script when the container starts
 CMD ["python3", "flows/cloud_deployment.py"]
+
+# TODO: Fixed Docker
