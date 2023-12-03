@@ -1,2 +1,4 @@
 google-cloud-bigquery
 streamlit
+db-dtypes
+matplotlib

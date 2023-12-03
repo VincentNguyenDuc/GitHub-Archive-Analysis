@@ -1,2 +1,4 @@
 pandas==1.5.2
 ipykernel==6.27.1
+google-cloud-bigquery
+db-dtypes
