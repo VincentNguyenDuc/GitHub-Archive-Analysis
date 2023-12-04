@@ -25,9 +25,14 @@ hour_occurences_df = run_query(
 )
 col1, col2 = st.columns([3, 1])
 with col1:
-    st.bar_chart(hour_occurences_df)
+    st.bar_chart(
+        data=hour_occurences_df,
+        x="hour",
+        y="total_actions",
+        color="#1799dd"
+    )
 with col2:
-    st.write(hour_occurences_df)
+    st.write(hour_occurences_df.set_index("hour"))
 
 
 ################################# GitHub Actions Types #################################
@@ -47,7 +52,7 @@ types_occurences_df = run_query(
 
 col1, col2 = st.columns([1, 3])
 with col1:
-    st.write(types_occurences_df)
+    st.write(types_occurences_df.set_index("type"))
 
 with col2:
     # Pie chart, where the slices will be ordered and plotted counter-clockwise:

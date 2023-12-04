@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import requests
 from google.cloud.bigquery import Client
 from google.oauth2 import service_account
 from utils.constants import GcpConstants
@@ -24,3 +25,11 @@ def run_query(query: str) -> pd.DataFrame:
         project=GcpConstants.PROJECT_ID
     )
     return query_job.to_dataframe()
+
+
+@st.cache_data(ttl=600)
+def load_lottieurl(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
