@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     flowname, year, month = args.flowname, args.year, args.month
     gcp_flow.serve(
-        name=f"GCP-{flowname}-Deployment-({year - month})",
+        name=f"GCP-{flowname}-Deployment-({year}-{month})",
         parameters={
             "name": flowname,
             "year": year,

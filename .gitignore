@@ -163,7 +163,7 @@ cython_debug/
 #.idea/
 
 # STREAMLIT
-.streamlit
+secrets.toml
 
 # TERRAFORM
 

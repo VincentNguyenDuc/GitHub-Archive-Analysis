@@ -160,4 +160,4 @@ def main_gcs_flow(
 
 
 if __name__ == "__main__":
-    main_gcs_flow(year=2015, month=1, days=[1, 2, 3], hours=[1])
+    main_gcs_flow(year=2020, month=1, days=[1])

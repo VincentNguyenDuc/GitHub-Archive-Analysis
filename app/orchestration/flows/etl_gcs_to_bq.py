@@ -111,13 +111,13 @@ def etl_gcs_to_bq(dt: datetime, teardown: bool = True) -> None:
     )
 
     # write data to table, wrap it around a task decorator
-    @task(name="Upload-Data", retries=3)
+    @task(name="GPQ-WRAPPER", retries=3)
     def to_gbq_wrapper():
         df.to_gbq(
             destination_table=f"{GcpConstants.BQ_DATASET}.{table_name}",
             project_id=GcpConstants.PROJECT_ID,
             credentials=gcp_creds.get_credentials_from_service_account(),
-            chunksize=500_000,
+            chunksize=200_000,
             if_exists="append",
             table_schema=schema,
             location=GcpConstants.LOCATION
@@ -151,4 +151,4 @@ def main_bq_flow(
 
 
 if __name__ == "__main__":
-    main_bq_flow(year=2015, month=1, days=[1, 2, 3], hours=[1])
+    main_bq_flow(year=2020, month=1, days=[1])
