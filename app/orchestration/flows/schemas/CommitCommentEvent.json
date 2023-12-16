@@ -1,0 +1,259 @@
+[
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "id",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "login",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "url",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "actor",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created_at",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "id",
+        "type": "FLOAT"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "login",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "url",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "org",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "author_association",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "body",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "commit_id",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "html_url",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "id",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "line",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "node_id",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "path",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "position",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "updated_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "url",
+            "type": "STRING"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "avatar_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "events_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "followers_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "following_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "gists_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "gravatar_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "html_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "id",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "login",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "node_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "organizations_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "received_events_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "repos_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "site_admin",
+                "type": "BOOLEAN"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "starred_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "subscriptions_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "type",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "url",
+                "type": "STRING"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "user",
+            "type": "RECORD"
+          }
+        ],
+        "mode": "NULLABLE",
+        "name": "comment",
+        "type": "RECORD"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "payload",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "public",
+    "type": "BOOLEAN"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "id",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "name",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "url",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "repo",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "type",
+    "type": "STRING"
+  }
+]

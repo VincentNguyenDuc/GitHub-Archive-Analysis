@@ -1,0 +1,24 @@
+# Streamlit
+streamlit
+streamlit-extras
+streamlit-lottie
+
+# Prefect
+prefect==2.14.2
+prefect-sqlalchemy==0.2.2
+prefect-gcp[cloud_storage,bigquery]==0.2.4
+
+# GCP
+google-cloud-bigquery
+pandas-gbq==0.18.1
+
+# Others
+db-dtypes
+matplotlib
+ipykernel==6.27.1
+pyarrow>=11.0.0
+pandas==1.5.2
+protobuf==4.21.11
+psycopg2-binary==2.9.5
+sqlalchemy==1.4.46
+pydantic==1.10.9

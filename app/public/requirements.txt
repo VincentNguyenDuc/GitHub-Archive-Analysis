@@ -1,6 +1,0 @@
-google-cloud-bigquery
-streamlit
-db-dtypes
-matplotlib
-streamlit-extras
-streamlit-lottie

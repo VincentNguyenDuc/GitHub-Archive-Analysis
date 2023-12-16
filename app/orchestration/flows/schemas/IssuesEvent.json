@@ -1,0 +1,709 @@
+[
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "id",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "login",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "url",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "actor",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created_at",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "id",
+        "type": "FLOAT"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "login",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "url",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "org",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "action",
+        "type": "STRING"
+      },
+      {
+        "fields": [
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "avatar_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "events_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "followers_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "following_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "gists_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "gravatar_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "html_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "id",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "login",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "node_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "organizations_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "received_events_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "repos_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "site_admin",
+                "type": "BOOLEAN"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "starred_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "subscriptions_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "type",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "url",
+                "type": "STRING"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "assignee",
+            "type": "RECORD"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "avatar_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "events_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "followers_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "following_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "gists_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "gravatar_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "html_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "id",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "login",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "node_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "organizations_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "received_events_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "repos_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "site_admin",
+                "type": "BOOLEAN"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "starred_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "subscriptions_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "type",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "url",
+                "type": "STRING"
+              }
+            ],
+            "mode": "REPEATED",
+            "name": "assignees",
+            "type": "RECORD"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "author_association",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "body",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "closed_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "comments",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "comments_url",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "events_url",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "html_url",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "id",
+            "type": "INTEGER"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "color",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "default",
+                "type": "BOOLEAN"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "description",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "id",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "name",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "node_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "url",
+                "type": "STRING"
+              }
+            ],
+            "mode": "REPEATED",
+            "name": "labels",
+            "type": "RECORD"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "labels_url",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "locked",
+            "type": "BOOLEAN"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "closed_at",
+                "type": "TIMESTAMP"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "closed_issues",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "created_at",
+                "type": "TIMESTAMP"
+              },
+              {
+                "fields": [
+                  {
+                    "mode": "NULLABLE",
+                    "name": "avatar_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "events_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "followers_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "following_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "gists_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "gravatar_id",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "html_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "id",
+                    "type": "INTEGER"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "login",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "node_id",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "organizations_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "received_events_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "repos_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "site_admin",
+                    "type": "BOOLEAN"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "starred_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "subscriptions_url",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "type",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "url",
+                    "type": "STRING"
+                  }
+                ],
+                "mode": "NULLABLE",
+                "name": "creator",
+                "type": "RECORD"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "description",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "due_on",
+                "type": "TIMESTAMP"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "html_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "id",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "labels_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "node_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "number",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "open_issues",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "state",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "title",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "updated_at",
+                "type": "TIMESTAMP"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "url",
+                "type": "STRING"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "milestone",
+            "type": "RECORD"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "node_id",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "number",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "repository_url",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "state",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "title",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "updated_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "url",
+            "type": "STRING"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "avatar_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "events_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "followers_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "following_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "gists_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "gravatar_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "html_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "id",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "login",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "node_id",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "organizations_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "received_events_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "repos_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "site_admin",
+                "type": "BOOLEAN"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "starred_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "subscriptions_url",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "type",
+                "type": "STRING"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "url",
+                "type": "STRING"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "user",
+            "type": "RECORD"
+          }
+        ],
+        "mode": "NULLABLE",
+        "name": "issue",
+        "type": "RECORD"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "payload",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "public",
+    "type": "BOOLEAN"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "id",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "name",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "url",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "repo",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "type",
+    "type": "STRING"
+  }
+]

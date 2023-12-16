@@ -8,7 +8,7 @@ from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect.tasks import task_input_hash
 from constants import GcpConstants, LocalConstants, DataConstants
-from utils import tear_down, set_up, rename_cols
+from utils import tear_down, set_up
 from datetime import timedelta, datetime
 import requests
 
@@ -34,62 +34,75 @@ def fetch_from_source(url: str, filename: str) -> pd.DataFrame:
     path = f"{LocalConstants.TEMP_PATH}/{filename}.{DataConstants.FILE_EXTENSION}"
     print("\n" + filename + "\n")
     get_response = requests.get(url, stream=True)
-    with open(path, 'wb') as f:
+    with open(path, "wb") as f:
         for chunk in get_response.iter_content(chunk_size=1024):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
 
     df = pd.read_json(
-        path, compression=DataConstants.COMPRESSION_TYPE, lines=True)
+        path,
+        compression=DataConstants.COMPRESSION_TYPE,
+        lines=True
+    )
     return df
 
 
-@task(
-    name="Transform-Data-From-Source",
-    retries=3,
-    log_prints=True
-)
+@task(name="Transform-Data", log_prints=True)
 def transform_data(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Perform a simple data wrangling
+    """Some simple data wrangling
 
     Args:
-        df (pd.DataFrame): a dataframe
-
-    Returns:
-        pd.DataFrame: clean dataframe
+        df (pd.DataFrame): a pandas dataframe
     """
+    df["actor"] = pd \
+        .json_normalize(df["actor"]) \
+        .drop(
+            labels=["gravatar_id", "display_login", "avatar_url"],
+            axis=1
+    ).to_dict(orient="records")
 
-    df.drop(["payload", "org"], axis=1, inplace=True)
-
-    actor = pd.json_normalize(df["actor"])
-    actor = actor.drop("gravatar_id", axis=1)
-    rename_cols(actor, "actor")
-
-    repo = pd.json_normalize(df["repo"])
-    rename_cols(repo, "repo")
-
-    clean_df = df.join([actor, repo])
-    clean_df.drop(["actor", "repo"], axis=1, inplace=True)
-
-    return clean_df
+    df["org"] = pd \
+        .json_normalize(df["org"]) \
+        .drop(
+            labels=["gravatar_id", "avatar_url"],
+            axis=1
+    ).to_dict(orient="records")
+    return df
 
 
 @task(name="Write-Local", log_prints=True)
-def write_local(df: pd.DataFrame, filename: str) -> Path:
-    """Write DataFrame out locally as csv gzipped file
+def write_local(df: pd.DataFrame, filename: str) -> [Path]:
+    """Write DataFrame out locally as json gzipped file
 
     Args:
         df (pd.DataFrame): a dataframe
         filename (str): the dataset file name
 
     Returns:
-        Path: a path object point at the location of the writen file
+        [Path]: a list of Path
     """
-    path = Path(
-        f"{LocalConstants.TEMP_PATH}/{filename}.{GcpConstants.FILE_EXTENSION}")
-    df.to_csv(path, compression=DataConstants.COMPRESSION_TYPE, index=False)
-    return path
+    paths = []
+
+    for event_name, splitted_df in df.groupby("type"):
+        # Construct folders
+        directory = f"{LocalConstants.TEMP_PATH}/{event_name}"
+        Path(directory).mkdir(parents=True, exist_ok=True)
+
+        path = Path(
+            f"{directory}/{filename}.{DataConstants.FILE_EXTENSION}"
+        )
+
+        splitted_df.to_json(
+            path_or_buf=path,
+            orient="records",
+            lines=True,
+            date_format="iso",
+            compression=DataConstants.COMPRESSION_TYPE
+        )
+
+        paths.append(path)
+
+    return paths
 
 
 @task(name="Write-GCS", log_prints=True)
@@ -108,7 +121,7 @@ def write_gcs(from_path: Path, to_path: Path) -> None:
 
 
 @flow(name="Data-Source-To-GCS", retries=3, log_prints=True)
-def etl_web_to_gcs(dt: datetime, teardown: bool = True) -> None:
+def etl_api_to_gcs(dt: datetime, teardown: bool = True) -> None:
     """The main ETL function
 
     Args:
@@ -126,38 +139,26 @@ def etl_web_to_gcs(dt: datetime, teardown: bool = True) -> None:
     # fetch data
     df = fetch_from_source(url, filename)
 
-    # transform
-    clean_df = transform_data(df)
+    df = transform_data(df)
 
-    # write to GCS
-    from_path = write_local(clean_df, filename)
-    to_path = f"{year}/{month}/{day}/{from_path.name}"
-    write_gcs(from_path, to_path)
+    # split the data by action types
+    from_paths: [Path] = write_local(df, filename)
+
+    # write to gcs
+    for path in from_paths:
+        path: Path
+        event_name = path.parent.name
+        file_name = path.name
+        write_gcs(
+            path,
+            Path(f"{event_name}/{file_name}")
+        )
 
     if teardown:
         tear_down()
 
 
-@flow(name="Main-GCS-Flow", log_prints=True)
-def main_gcs_flow(
-    year: int = 2015,
-    month: int = 1,
-    days: list[int] = list(range(1, 32)),
-    hours: list[int] = list(range(24))
-):
-    """Execute multiples ETL flows from Data Source to Cloud Storage
-
-    Args:
-        year (int, optional): A year. Defaults to 2015.
-        month (int, optional): a month. Defaults to 1.
-        days (list[int], optional): days of a month. Defaults to list(range(1, 32)).
-        hours (list[int], optional): hours of a day. Defaults to list(range(24)).
-    """
-    for d in days:
-        for h in hours:
-            dt = datetime(year=year, month=month, day=d, hour=h)
-            etl_web_to_gcs(dt)
-
-
 if __name__ == "__main__":
-    main_gcs_flow(year=2020, month=1, days=[1])
+    for h in range(20, 24):
+        dt = datetime(year=2020, month=1, day=1, hour=h)
+        etl_api_to_gcs(dt)

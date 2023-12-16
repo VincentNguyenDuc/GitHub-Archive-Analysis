@@ -2,23 +2,12 @@
 Helper Utility Functions
 """
 
-import pandas as pd
 from pathlib import Path
 from prefect import task
 from constants import LocalConstants
+from prefect_gcp.bigquery import SchemaField
 import shutil
-
-
-def rename_cols(df: pd.DataFrame, prefix: str) -> None:
-    """Add a prefix to every column of a dataframe
-
-    Args:
-        df (pd.DataFrame): a dataframe
-        prefix (str): a string
-    """
-    col_names = df.columns.to_list()
-    new_col_names = list(map(lambda name: f"{prefix}_{name}", col_names))
-    df.columns = new_col_names
+import json
 
 
 @task(name="folder-set-up")
@@ -33,3 +22,19 @@ def tear_down() -> None:
     """Tear down temporary folder"""
     shutil.rmtree(LocalConstants.TEMP_PATH)
     return None
+
+
+def get_schema(event_name: str) -> list[SchemaField]:
+    """Get schema from json file"""
+    path = Path(f"./schemas/{event_name}.json")
+    with open(path) as json_file:
+        event_schema = json.load(json_file)
+
+    return list(map(
+        SchemaField.from_api_repr,
+        event_schema
+    ))
+
+
+if __name__ == "__main__":
+    get_schema("CommitCommentEvent")
