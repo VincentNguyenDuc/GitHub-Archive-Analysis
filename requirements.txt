@@ -12,6 +12,9 @@ prefect-gcp[cloud_storage,bigquery]==0.2.4
 google-cloud-bigquery
 pandas-gbq==0.18.1
 
+# DBT
+dbt-bigquery
+
 # Others
 db-dtypes
 matplotlib

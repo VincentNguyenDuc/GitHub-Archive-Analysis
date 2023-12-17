@@ -1,6 +1,6 @@
-INFRA_DIR = ./infrastructure
-ORCHES_DIR = ./orchestration
-EXPLOR_DIR = ./exploration
+INFRA_DIR = ./app/infrastructure
+ORCHES_DIR = ./app/orchestration
+EXPLOR_DIR = ./app/exploration
 
 terraform_build:
 	terraform -chdir=${INFRA_DIR} init
